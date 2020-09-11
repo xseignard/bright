@@ -3,6 +3,7 @@
 #include <Tlc59711.h>
 #include <ArtNode.h>
 #include <ArtNetFrameExtension.h>
+#include <elapsedMillis.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // debug mode: 0 no debug, 1 debug
@@ -12,9 +13,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // conf: the only things that need to be touched
-#define NAME "BRIGHT 2"
-#define LONG_NAME "BRIGHT 2"
-#define CUSTOM_ID 2
+#define NAME "BRIGHT 1"
+#define LONG_NAME "BRIGHT 1"
+#define CUSTOM_ID 1
 // pass sync to 0 if your software don't send art-sync packets (e.g millumin, max/msp, and so on)
 #define SYNC 1
 
@@ -24,11 +25,16 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // output config
-#define NUM_STRIPS 26
+#if CUSTOM_ID == 1
+#define NUM_STRIPS 28
+#define NUM_ARTNET_PORTS 4
+#else
+#define NUM_STRIPS 26 // TODO: change to 20!
+#define NUM_ARTNET_PORTS 4 // TODO: change to 3!
+#endif
 #define NUM_TLC NUM_STRIPS * 3
 #define LEDS_PER_TLC 12
 #define NUM_LEDS NUM_TLC * LEDS_PER_TLC
-#define NUM_ARTNET_PORTS 4
 #define DATA_PIN 7 // 11
 #define CLOCK_PIN 6 // 13
 
@@ -65,6 +71,8 @@ EthernetUDP udp;
 // 576 is the max size of an artnet packet
 byte buffer[576];
 
+elapsedMillis fps;
+unsigned long interval = 17;
 ///////////////////////////////////////////////////////////////////////////////
 void setup() {
   if (DEBUG) Serial.begin(9600);
@@ -82,7 +90,7 @@ void setup() {
   Ethernet.begin(config.mac, config.ip, gateway, gateway, subnet);
   // Check for Ethernet hardware present
   if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-    if (DEBUG) Serial.println("Ethernet shield was not found.  Sorry, can't run without hardware. :(");
+    if (DEBUG) Serial.println("Ethernet shield was not found. Sorry, can't run without hardware. :(");
     while (true) {
       delay(1); // do nothing, no point running without Ethernet hardware
     }
@@ -94,8 +102,6 @@ void setup() {
   node = ArtNodeExtended(config, sizeof(buffer), buffer);
   // init leds
   tlc.beginSlow();
-  tlc.setBrightness();
-  tlc.write();
   // proceed a blink to check if everything is ok
   blink();
 }
@@ -129,27 +135,36 @@ void loop() {
             ArtDmx* dmx = (ArtDmx*) buffer;
             int port = node.getAddress(dmx->SubUni, dmx->Net) - node.getStartAddress();
             if (port >= 0 && port < config.numPorts) {
-              Serial.println(port);
               byte* data = (byte*) dmx->Data;
-              int max = port == 3 ? 180 : 252;
+              int max;
+              if (CUSTOM_ID == 1) max = 252;
+              // TODO: change next line to: max = port == 2 ? 216 : 252;
+              else {
+                if (port == 3) max = 180;
+                else max = 252;
+              }
               for (int i = 0; i < max; i++) {
                 uint16_t value = data[i * 2] * 256 + data[i * 2 + 1];
                 tlc.setChannel(i + port * 252, value);
               }
             }
 
-            if (!SYNC) {
+            if (fps >= interval) {
               tlc.write();
+              fps = 0;
             }
+            // if (!SYNC) {
+            //   tlc.write();
+            // }
             break;
           }
 
           // for a sync message, show the updated state of the pixels
           case OpSync: {
             if (DEBUG) Serial.println("SYNC");
-            if (SYNC) {
-              tlc.write();
-            }
+            // if (SYNC) {
+            //   tlc.write();
+            // }
             break;
           }
 
@@ -184,7 +199,7 @@ void blink() {
   tlc.setChannel(0, 65535);
   tlc.write();
   delay(2000);
-  tlc.setBrightness();
+  tlc.setTmgrst();
   tlc.setChannel(0, 0);
   tlc.write();
   delay(100);
