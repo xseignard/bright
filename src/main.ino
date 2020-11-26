@@ -13,8 +13,6 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 // conf: the only things that need to be touched
-#define NAME "BRIGHT 1"
-#define LONG_NAME "BRIGHT 1"
 #define CUSTOM_ID 1
 // pass sync to 0 if your software don't send art-sync packets (e.g millumin, max/msp, and so on)
 #define SYNC 1
@@ -26,17 +24,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 // output config
 #if CUSTOM_ID == 1
-#define NUM_STRIPS 28
-#define NUM_ARTNET_PORTS 4
-#else
-#define NUM_STRIPS 26 // TODO: change to 20!
-#define NUM_ARTNET_PORTS 4 // TODO: change to 3!
+#define NAME "BRIGHT 1"
+#define LONG_NAME "BRIGHT 1"
+#define NUM_STRIPS 16 // 16 // 28
+#define NUM_ARTNET_PORTS 3 // 3 // 4
+#elif CUSTOM_ID == 2
+#define NAME "BRIGHT 2"
+#define LONG_NAME "BRIGHT 2"
+#define NUM_STRIPS 12
+#define NUM_ARTNET_PORTS 2
+#elif CUSTOM_ID == 3
+#define NAME "BRIGHT 3"
+#define LONG_NAME "BRIGHT 3"
+#define NUM_STRIPS 8
+#define NUM_ARTNET_PORTS 2
+#elif CUSTOM_ID == 4
+#define NAME "BRIGHT 4"
+#define LONG_NAME "BRIGHT 4"
+#define NUM_STRIPS 12
+#define NUM_ARTNET_PORTS 2
 #endif
 #define NUM_TLC NUM_STRIPS * 3
 #define LEDS_PER_TLC 12
 #define NUM_LEDS NUM_TLC * LEDS_PER_TLC
-#define DATA_PIN 7 // 11
-#define CLOCK_PIN 6 // 13
+#define DATA_PIN 7
+#define CLOCK_PIN 6
 
 Tlc59711 tlc(NUM_TLC, CLOCK_PIN, DATA_PIN);
 
@@ -137,10 +149,21 @@ void loop() {
             if (port >= 0 && port < config.numPorts) {
               byte* data = (byte*) dmx->Data;
               int max;
-              if (CUSTOM_ID == 1) max = 252;
-              // TODO: change next line to: max = port == 2 ? 216 : 252;
+              if (CUSTOM_ID == 1) {
+                if (port == 2) max = 72;
+                else max = 252;
+                // max = 252;
+              }
+              else if (CUSTOM_ID == 2) {
+                if (port == 1) max = 180;
+                else max = 252;
+              }
+              else if (CUSTOM_ID == 3) {
+                if (port == 1) max = 36;
+                else max = 252;
+              }
               else {
-                if (port == 3) max = 180;
+                if (port == 1) max = 180;
                 else max = 252;
               }
               for (int i = 0; i < max; i++) {
