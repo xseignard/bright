@@ -12,23 +12,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // output config
 #if CUSTOM_ID == 1
-#define NAME "BRIGHT 1"
-#define LONG_NAME "BRIGHT 1"
 #define NUM_STRIPS 16
 
 #elif CUSTOM_ID == 2
-#define NAME "BRIGHT 2"
-#define LONG_NAME "BRIGHT 2"
 #define NUM_STRIPS 12
 
 #elif CUSTOM_ID == 3
-#define NAME "BRIGHT 3"
-#define LONG_NAME "BRIGHT 3"
 #define NUM_STRIPS 8
 
 #elif CUSTOM_ID == 4
-#define NAME "BRIGHT 4"
-#define LONG_NAME "BRIGHT 4"
 #define NUM_STRIPS 12
 #endif
 
@@ -51,6 +43,23 @@ Tlc59711 tlc(NUM_TLC, CLOCK_PIN, DATA_PIN);
 #define DEBUG 0
 // pass sync to 0 if your software don't send art-sync packets (e.g millumin, max/msp, and so on)
 #define SYNC 1
+
+#if CUSTOM_ID == 1
+#define NAME "BRIGHT 1"
+#define LONG_NAME "BRIGHT 1"
+
+#elif CUSTOM_ID == 2
+#define NAME "BRIGHT 2"
+#define LONG_NAME "BRIGHT 2"
+
+#elif CUSTOM_ID == 3
+#define NAME "BRIGHT 3"
+#define LONG_NAME "BRIGHT 3"
+
+#elif CUSTOM_ID == 4
+#define NAME "BRIGHT 4"
+#define LONG_NAME "BRIGHT 4"
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // artnet and udp conf
