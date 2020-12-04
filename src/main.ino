@@ -6,51 +6,51 @@
 #include <elapsedMillis.h>
 
 ///////////////////////////////////////////////////////////////////////////////
-// debug mode: 0 no debug, 1 debug
-// when in debug mode, some informations a sent via serial
-// debug slows down the artnet decoding!!
-#define DEBUG 0
-
+// CONFIGURATION
 ///////////////////////////////////////////////////////////////////////////////
-// conf: the only things that need to be touched
-#define CUSTOM_ID 1
-// pass sync to 0 if your software don't send art-sync packets (e.g millumin, max/msp, and so on)
-#define SYNC 1
-
-///////////////////////////////////////////////////////////////////////////////
-// TOUCH THE BELOW CODE AT YOUR OWN RISKS!!
-///////////////////////////////////////////////////////////////////////////////
-
+#define CUSTOM_ID 2
 ///////////////////////////////////////////////////////////////////////////////
 // output config
 #if CUSTOM_ID == 1
 #define NAME "BRIGHT 1"
 #define LONG_NAME "BRIGHT 1"
-#define NUM_STRIPS 16 // 16 // 28
-#define NUM_ARTNET_PORTS 3 // 3 // 4
+#define NUM_STRIPS 16
+
 #elif CUSTOM_ID == 2
 #define NAME "BRIGHT 2"
 #define LONG_NAME "BRIGHT 2"
 #define NUM_STRIPS 12
-#define NUM_ARTNET_PORTS 2
+
 #elif CUSTOM_ID == 3
 #define NAME "BRIGHT 3"
 #define LONG_NAME "BRIGHT 3"
 #define NUM_STRIPS 8
-#define NUM_ARTNET_PORTS 2
+
 #elif CUSTOM_ID == 4
 #define NAME "BRIGHT 4"
 #define LONG_NAME "BRIGHT 4"
 #define NUM_STRIPS 12
-#define NUM_ARTNET_PORTS 2
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+// TOUCH BELOW AT YOUR OWN RISKS!!!!
+///////////////////////////////////////////////////////////////////////////////
 #define NUM_TLC NUM_STRIPS * 3
 #define LEDS_PER_TLC 12
 #define NUM_LEDS NUM_TLC * LEDS_PER_TLC
 #define DATA_PIN 7
 #define CLOCK_PIN 6
+const int numArtnetPorts = ceil((NUM_LEDS * 2) / 512);
 
 Tlc59711 tlc(NUM_TLC, CLOCK_PIN, DATA_PIN);
+
+///////////////////////////////////////////////////////////////////////////////
+// debug mode: 0 no debug, 1 debug
+// when in debug mode, some informations a sent via serial
+// debug slows down the artnet decoding!!
+#define DEBUG 0
+// pass sync to 0 if your software don't send art-sync packets (e.g millumin, max/msp, and so on)
+#define SYNC 1
 
 ///////////////////////////////////////////////////////////////////////////////
 // artnet and udp conf
@@ -65,7 +65,7 @@ ArtConfig config = {
   0, 0,                                 // net (0-127) and subnet (0-15)
   NAME,                                 // short name
   LONG_NAME,                            // long name
-  NUM_ARTNET_PORTS,                     // number of ports
+  numArtnetPorts,                     // number of ports
   {                                     // port types
     PortTypeDmx | PortTypeOutput,
     PortTypeDmx | PortTypeOutput,
